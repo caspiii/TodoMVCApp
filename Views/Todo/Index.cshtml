@@ -1,0 +1,103 @@
+@model List<TodoMvcApp.Models.TodoItem>
+
+<h2 class="mb-4">To-Do List</h2>
+
+@{
+    var showHidden = Context.Request.Query["showHidden"] == "true";
+}
+
+@if (!showHidden)
+{
+    <a class="btn btn-sm btn-outline-info mb-3" href="?showHidden=true">Show Hidden Tasks</a>
+}
+else
+{
+    <a class="btn btn-sm btn-outline-secondary mb-3" href="/">Hide Hidden Tasks</a>
+}
+
+<form method="get" class="row g-3 mb-3">
+    <div class="col-md-4">
+        <input class="form-control" name="category" placeholder="Category" />
+    </div>
+    <div class="col-md-3">
+        <select class="form-select" name="priority">
+            <option value="">All Priorities</option>
+            <option value="1">High</option>
+            <option value="2">Medium</option>
+            <option value="3">Low</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+    </div>
+</form>
+
+<form method="post" asp-action="Add" class="row g-3 mb-4">
+    <div class="col-md-4">
+        <input class="form-control" name="title" placeholder="Task name" required />
+    </div>
+    <div class="col-md-3">
+        <input class="form-control" name="category" placeholder="Category" />
+    </div>
+    <div class="col-md-3">
+        <select class="form-select" name="priority">
+            <option value="1">High</option>
+            <option value="2">Medium</option>
+            <option value="3">Low</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-success w-100">Add</button>
+    </div>
+</form>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No tasks to show.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td>@item.Category</td>
+                <td>
+                    @(
+                        item.Priority == 1 ? "🔴 High" :
+                        item.Priority == 2 ? "🟡 Medium" : "🟢 Low"
+                    )
+                </td>
+                <td>
+                    @(item.IsCompleted ? "✅ Done" : "⏳ Pending")
+                </td>
+                <td>
+                    <a href="/Todo/Toggle/@item.Id" class="btn btn-sm btn-outline-secondary">Toggle</a>
+
+                    @if (!item.IsHidden)
+                    {
+                        <a href="/Todo/Hide/@item.Id" class="btn btn-sm btn-outline-warning">Hide</a>
+                        <a href="/Todo/Delete/@item.Id" class="btn btn-sm btn-outline-danger delete-btn">Delete</a>
+                    }
+                    else
+                    {
+                        <a href="/Todo/Unhide/@item.Id" class="btn btn-sm btn-outline-success">Unhide</a>
+                        <a href="/Todo/Delete/@item.Id" class="btn btn-sm btn-outline-danger delete-btn">Delete</a>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
